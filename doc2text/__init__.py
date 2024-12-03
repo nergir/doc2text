@@ -4,7 +4,8 @@ import os
 import mimetypes
 
 import PyPDF2 as pyPdf
-import PythonMagick
+#import PythonMagick
+from PIL import Image
 import cv2
 
 from .page import Page
@@ -48,10 +49,12 @@ class Document(object):
                     im_path = 'temp.png'
                     with open(path, 'wb') as f:
                         output.write(f)
-                    im = PythonMagick.Image()
-                    im.density("300")
-                    im.read(path)
-                    im.write(im_path)
+                    im = Image.open(path)
+                    im.save(im_path, dpi=(300, 300))
+                    #im = PythonMagick.Image()
+                    #im.density("300")
+                    #im.read(path)
+                    #im.write(im_path)
                     orig_im = cv2.imread(im_path, 0)
                     page = Page(orig_im, i, self.lang)
                     self.pages.append(page)
@@ -65,13 +68,15 @@ class Document(object):
         # If the file is an image, think of it as a 1-page pdf.
         elif self.mime_type[0] in acceptable_mime:
             self.num_pages = 1
-            im = PythonMagick.Image()
-            im.density("300")
-            im.read(path)
             temp_path = os.path.normpath(os.path.join(
                 self.file_basepath, self.file_basename + '_temp.png'
             ))
-            im.write(temp_path)
+            im = Image.open(path)
+            im.save(temp_path, dpi=(300, 300))
+            #im = PythonMagick.Image()
+            #im.density("300")
+            #im.read(path)
+            #im.write(temp_path)
             orig_im = cv2.imread(temp_path, 0)
             os.remove(temp_path)
             page = Page(orig_im, 0)
